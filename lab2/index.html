@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+        <link rel="icon" href="data/favicon.png">
+        <title>Parks Road Trip</title>
+    <!-- CSS Imports -->
+    <meta charset=utf-8>
+    <meta name=viewport content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="http://libs.cartocdn.com/cartodb.js/v3/3.15/themes/css/cartodb.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://mapzen.com/js/mapzen.css">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous" rel="stylesheet">
+    <link rel="stylesheet" href="css/leaflet-sidebar.css" />
+        <link rel="stylesheet" href="css/leaflet-sidebar.min.css" />
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+      <link rel="stylesheet" href="css/style.css" />
+    <!-- Latest compiled and minified CSS -->
+  <body>
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar collapsed">
+        <!-- Nav tabs -->
+        <div class="sidebar-tabs">
+            <ul role="tablist">
+                <li><a href="#home" role="tab"><i class="fa fa-bars"></i></a></li>
+                <li><a href="#help" role="tab"><i class="fa fa-question"></i></a></li>
+                </ul>
+        </div>
+        <!-- Tab panes -->
+        <div class="sidebar-content">
+            <div class="sidebar-pane" id="home">
+              <h1 class="sidebar-header">
+                  Parks Road Trip
+                  <span class="sidebar-close"><i class="fa fa-caret-left"></i></span>
+              </h1>
+                <h2 class = "direction">Enter a destination and we'll show you parks along the way!</h2>
+                <h2 class = "direction2">Use the second search box for a start place (default is current location).</h2>
+            </div>
+            <div class="sidebar-pane" id="help">
+                <h1 class="sidebar-header">Information<span class="sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
+                <h2 >Enter a destination and we'll show you parks along the way!</h2>
+                <h2 >Use the second search box for a start place (default is current location).</h2>
+            </div>
+        </div>
+    </div>
+    <a href="https://github.com/Turbo87/sidebar-v2/"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
+
+    <!-- Button -->
+
+
+
+    <div id="map" class="map"></div>
+
+
+    <button id = "terrain" class="material-icons" title = "Terrain View">terrain</button>
+    <button id = "hybrid" class="material-icons" title = "Hybrid View">flight</button>
+    <button id = "road" class="material-icons" title = "Streets View">directions_car</button>
+    <button id = "satellite" class="material-icons" title = "Satellite View">satellite</button>
+    <button id = "nightsky" class="material-icons" title = "Nightsky View">wb_incandescent</button>
+    <button id = "home2" class="material-icons light" title = "Zoom to my location">my_location</button>
+
+
+    <!-- Javascript Imports -->
+    <script src="https://code.jquery.com/jquery-2.2.2.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+    <script src="https://mapzen.com/js/mapzen.min.js"></script>
+    <script src="http://libs.cartocdn.com/cartodb.js/v3/3.15/cartodb.js"></script>
+    <script src="js/decode.js"></script>
+    <script src="js/leaflet-sidebar.min.js"></script>
+    <script src="js/setup.js"></script>
+    <script src="js/main.js"></script>
+  </body>
+</html>
