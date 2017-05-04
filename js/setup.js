@@ -83,7 +83,7 @@ $("#home2").click(function() {
 
 
 
-
+var line;
 // Make the geoJson from the array of coordinate arrays
 var make_route = function(deciphered) {
   // Using format from geojson.io
@@ -121,7 +121,7 @@ var add_line_to_map = function(route_geo) {
 };
 
 // Gets the ciphered data from mapzen mobility
-var get_ciphered_route = function(data) {
+function get_ciphered_route(data) {
 
   // Trying to arrange it orderly with all the quotes. Still looks messy
   cipher_url = 'https://valhalla.mapzen.com/route?json={"locations":' +
@@ -142,7 +142,7 @@ var get_ciphered_route = function(data) {
 
     add_line_to_map(route_geo);
     add_directions();
-
+    nearestParks();
 
 
     proper_bound =  map.getBoundsZoom([
@@ -186,6 +186,115 @@ add_directions = function() {
 };
 
 
+
 // Makes the sidebar
 var sidebar = L.control.sidebar('sidebar').addTo(map);
 sidebar.open('home');
+
+
+var app = {
+  apikey: "8bae1f5e5df3373711ef6aaea3867fc2f0920931",
+  geojsonClient: new cartodb.SQL({ user: 'jacobkap', format: 'geojson' })
+};
+
+// SLider value change
+ $("#slider").on("input", function(){
+   $('#range_value').empty();
+   $('#range_value').append("<span id = 'range_value'><h2>" +
+     this.value +
+     " Miles</h2></span>");
+     nearestParks();
+ });
+
+// checkbox changes
+var national_park_alllowed = "";
+var national_forest_alllowed = "";
+var national_monument_alllowed = "";
+var state_park_alllowed = "";
+$('input:checkbox').change(function() {
+  if ($('#national_park').prop('checked')) {
+    national_park_alllowed = "";
+  } else {
+    national_park_alllowed = " AND type <> 'national_park'";
+  }
+
+  if ($('#national_forest').prop('checked')) {
+    national_forest_alllowed = "";
+  } else {
+    national_forest_alllowed = " AND type <> 'national_forest'";
+  }
+
+  if ($('#national_monument').prop('checked')) {
+    national_monument_alllowed = "";
+  } else {
+    national_monument_alllowed = " AND type <> 'national_monument'";
+  }
+
+  if ($('#state_park').prop('checked')) {
+    state_park_alllowed = "";
+  } else {
+    state_park_alllowed = " AND type <> 'state_park'";
+  }
+    nearestParks();
+
+});
+
+function nearestParks(){
+
+    while (line.features[0].geometry.coordinates.length > 75) {
+      _.filter(line.features[0].geometry.coordinates, function(item, index) {
+        if(index % 10 === 0){line.features[0].geometry.coordinates.splice(index, 1);}
+        });
+    }
+
+
+  coordsArray = '';
+  _.each(line.features[0].geometry.coordinates,
+     function(location) {coordsArray = coordsArray +
+        'ST_MakePoint(' +
+         location[0] +
+         ',' +
+          location[1] +
+          '), ';
+        });
+
+    coordsArray = coordsArray.slice(0, -2);
+
+
+  app.geojsonClient.execute("SELECT * FROM parks_finished_1 WHERE " +
+                           'ST_DWithin(ST_MakeLine(ARRAY[' +
+                            coordsArray +
+                           '])::geography, the_geom::geography, ' + $("#slider").val() + '* 1609)' +
+                            national_park_alllowed +
+                            national_forest_alllowed +
+                            national_monument_alllowed +
+                            state_park_alllowed)
+  .done(function(data) {
+    console.log(data);
+
+    var geojsonMarkerOptions = {
+        radius: 8,
+        fillColor: "#228b22",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.8
+    };
+
+    if (typeof tempParks !== 'undefined') {
+      _.map(tempParks, function(park){park.removeFrom(map);});
+    }
+
+    tempParks = [];
+    _.map(data.features, function(park) {
+    tempParks.push(L.circleMarker([park.geometry.coordinates[1],
+        park.geometry.coordinates[0]], geojsonMarkerOptions).bindPopup(
+          'Park Name: ' + park.properties.name + '<br>' +
+          'Address: ' + park.properties.real_address + '<br>' +
+          'Notes: ' + park.properties.notes
+        ));});
+    _.map(tempParks, function(parks) {parks.addTo(map);});
+  })
+  .error(function(errors) {
+  });
+}

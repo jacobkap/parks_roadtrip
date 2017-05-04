@@ -124,8 +124,7 @@ geocoder <- function(dataset, reverse = FALSE) {
     }
     for (i in 1:nrow(dataset)) {
       if (suppressMessages(geocodeQueryCheck() > 0) &&
-          !is.na(dataset$lon[i]) &&
-          !is.na(dataset$lat[i])) {
+          is.na(dataset$real_address[i]) && !is.na(dataset$lon[i])) {
         dataset$real_address[i] <-
               ggmap::revgeocode(as.numeric(c(parks_finished$lon[i],
                                              parks_finished$lat[i])))
@@ -140,6 +139,16 @@ setwd("C:/Users/user/Dropbox/Penn/PhD/Spring_2017/Javascript/final")
 load("parks_finished.rda")
 parks_finished <- geocoder(parks_finished)
 parks_finished <- geocoder(parks_finished, reverse = TRUE)
+parks_finished$notes <- gsub("\\[.*", "", parks_finished$notes)
+
+unique(parks_finished$type)
+parks_finished$type[parks_finished$type == "National Monument"] <-
+  "national_monument"
+parks_finished$type[parks_finished$type == "National Park"] <-
+  "national_park"
+parks_finished$type[parks_finished$type == "National Forest"] <-
+  "national_forest"
+parks_finished$real_address <- as.character(parks_finished$real_address)
 
 parks <- plyr::rbind.fill(geocoded_parks, parks)
 parks_finished <- parks

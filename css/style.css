@@ -11,7 +11,9 @@ p {
   font-size: 18px;
 }
 
-
+.park-bar {
+  display:inline-block;
+}
 
 .map {
   position: absolute;
