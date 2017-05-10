@@ -91,10 +91,11 @@ make_address = function(address) {
 };
 
 var mapzen_url;
+var end_address;
 end_geocoder_func = function() {
 
-  address = $('.leaflet-pelias-input').last().val();
-  mapzen_url = make_address(address);
+  end_address = $('.leaflet-pelias-input').last().val();
+  mapzen_url = make_address(end_address);
 
 
     main_function();
@@ -102,9 +103,10 @@ end_geocoder_func = function() {
 };
 
 var start_mapzen_url;
+var start_address = 'Current Location';
 start_geocoder.on('select', function (e) {
-  address = $('.leaflet-pelias-input').first().val();
-  start_mapzen_url = make_address(address);
+  start_address = $('.leaflet-pelias-input').first().val();
+  start_mapzen_url = make_address(start_address);
 
   sidebar.open('home');
   start_function();

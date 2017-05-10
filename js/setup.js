@@ -2,77 +2,6 @@ var deciphered; // deciphered results from the mapzen weird route response
 var geo_obj; // geoJson object to be added. Made here for easy removal
 var cipher; // for deciphering and directions
 
-// Setting up our map
-var map = L.map('map', {
-  center: [38.553746, -97.009345],
-  zoom: 4,
-  zoomControl: false,
-});
-
-/*
-var custom = L.tileLayer('https://api.mapbox.com/styles/v1/jkkaplan/cizutwown001d2ss1hcixcpj0/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoiamtrYXBsYW4iLCJhIjoiY2lnOXAyaWZyMHNjZ3V5bHg4YTZieDczaSJ9.vSjaF4o2xaDFhNAv9Z2y7A', {
-  subdomains: 'abcd',
-  minZoom: 0,
-  maxZoom: 20,
-  ext: 'png'
-});
-*/
-
-var googleStreets = L.tileLayer('http://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3']
-});
-
-var nightsky = L.tileLayer('http://map1.vis.earthdata.nasa.gov/wmts-webmerc/VIIRS_CityLights_2012/default/{time}/{tilematrixset}{maxZoom}/{z}/{y}/{x}.{format}', {
-	attribution: 'Imagery provided by services from the Global Imagery Browse Services (GIBS)',
-	bounds: [[-85.0511287776, -179.999999975], [85.0511287776, 179.999999975]],
-	minZoom: 1,
-	maxZoom: 8,
-	format: 'jpg',
-	time: '',
-	tilematrixset: 'GoogleMapsCompatible_Level'
-});
-
-var googleSat  = L.tileLayer('http://{s}.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3']
-});
-
-var googleTerrain = L.tileLayer('http://{s}.google.com/vt/lyrs=p&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3']
-});
-
-var googleHybrid = L.tileLayer('http://{s}.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}',{
-    maxZoom: 20,
-    subdomains:['mt0','mt1','mt2','mt3']
-});
-
-
-current_basemap = googleTerrain;
-current_basemap.addTo(map);
-
-L.control.zoom({
-     position:'bottomright'
-}).addTo(map);
-
-
-
-$(".material-icons").click(function() {
-  current_basemap.removeFrom(map);
-  if (this.id === "terrain") {
-    current_basemap = googleTerrain;
-  } else  if (this.id === "hybrid") {
-      current_basemap = googleHybrid;
-  } else  if (this.id === "road") {
-      current_basemap = googleStreets;
-  } else if (this.id === "satellite") {
-    current_basemap = googleSat;
-  } else if (this.id === "nightsky"){
-    current_basemap = nightsky;
-  }
-  current_basemap.addTo(map);
-});
 
 $("#home2").click(function() {
   // zoom = map.getZoom();
@@ -80,8 +9,6 @@ $("#home2").click(function() {
    map.setView(state.position.marker._latlng, 11);
  }
 });
-
-
 
 var line;
 // Make the geoJson from the array of coordinate arrays
@@ -164,17 +91,22 @@ function get_ciphered_route(data) {
 
 
   });
-};
+}
 
 add_directions = function() {
   $('.direction').empty();// remove any previous directions
     $('.direction2').empty();// remove any previous directions
-  $('.direction').append('<span class = directions><h3>' + results.features[0].properties.name +
-    '</h3></span>');
-    $('.direction').append('<span class = directions><h5>Distance: ' + Math.round(cipher.trip.legs[0].summary.length) +
-      ' Miles</h5></span>');
-      $('.direction').append('<span class = directions><h5>Time: ' + Math.round(cipher.trip.legs[0].summary.time/ 60 / 60) +
-        ' Hours</h5></span>');
+  $('.direction').append('<span class = directions><h5>From: ' +
+   start_address + '<br>' +
+   'To: ' +
+   end_address +
+    '</h5></span>');
+    $('.direction').append('<span class = directions><p>Distance: ' +
+    Math.round(cipher.trip.legs[0].summary.length) +
+      ' Miles</p></span>');
+      $('.direction').append('<span class = directions><p>Time: ' +
+      Math.round(cipher.trip.legs[0].summary.time/ 60 / 60) +
+        ' Hours</h6></span>');
   _.each(cipher.trip.legs[0].maneuvers, function(directions) {
     length = directions.verbal_post_transition_instruction;
     if (typeof length === "undefined") {
@@ -243,7 +175,10 @@ function nearestParks(){
 
     while (line.features[0].geometry.coordinates.length > 75) {
       _.filter(line.features[0].geometry.coordinates, function(item, index) {
-        if(index % 10 === 0){line.features[0].geometry.coordinates.splice(index, 1);}
+        if(index % 10 === 0 &
+           index > 10 &
+           index < (line.features[0].geometry.coordinates.length-10)){
+             line.features[0].geometry.coordinates.splice(index, 1);}
         });
     }
 
@@ -278,7 +213,7 @@ function nearestParks(){
         color: "#000",
         weight: 1,
         opacity: 1,
-        fillOpacity: 0.8
+        fillOpacity: 0.8,
     };
 
     if (typeof tempParks !== 'undefined') {
@@ -287,12 +222,11 @@ function nearestParks(){
 
     tempParks = [];
     _.map(data.features, function(park) {
-    tempParks.push(L.circleMarker([park.geometry.coordinates[1],
-        park.geometry.coordinates[0]], geojsonMarkerOptions).bindPopup(
-          'Park Name: ' + park.properties.name + '<br>' +
+    tempParks.push(new L.Marker([park.geometry.coordinates[1],
+        park.geometry.coordinates[0]], {icon: iconSelector(park.properties.type)}).bindPopup(
+          park.properties.name + '<br>' +
           'Address: ' + park.properties.real_address + '<br>' +
-          'Notes: ' + park.properties.notes
-        ));});
+          'Notes: ' + park.properties.notes));});
     _.map(tempParks, function(parks) {parks.addTo(map);});
   })
   .error(function(errors) {
